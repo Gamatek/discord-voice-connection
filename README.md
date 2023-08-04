@@ -1,4 +1,4 @@
-# discord-voice-connection
+# 🔊 Discord VoiceConnection
 
 ## Exemple
 
