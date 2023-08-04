@@ -18,11 +18,11 @@ const client = new Client({
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}`);
 
-    const conn = new VoiceConnection(client, "897205524481851422");
+    const conn = new VoiceConnection(client, "CHANNEL_ID");
     conn.join().then(() => {
         console.log("joined");
         conn.play(
-            ytdl("https://www.youtube.com/watch?v=Wt2fuNtgYDM&pp=ygUFc2F5YW4%3D", {
+            ytdl("VIDEO_URL", {
                 filter: "audioonly",
                 highWaterMark: 1 << 62,
                 liveBuffer: 1 << 62,
