@@ -3,7 +3,7 @@
 ## Exemple
 
 ```js
-const { Client, Intents, Collection } = require("discord.js");
+const { Client, Intents } = require("discord.js");
 const VoiceConnection = require("./VoiceConnection");
 const ytdl = require("ytdl-core");
 const config = require("./config.json");
