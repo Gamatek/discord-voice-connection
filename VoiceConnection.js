@@ -168,7 +168,7 @@ class VoiceConnection {
             if(connection) {
                 if(connection.state.status === VoiceConnectionStatus.Ready) {
                     if(this._resource) {
-                        resolve(this._resource.volume.volume*100);
+                        resolve(this._resource.volume.volume);
                     } else {
                         reject(new VoiceConnectionError("NO_RESOURCE"));
                     };
