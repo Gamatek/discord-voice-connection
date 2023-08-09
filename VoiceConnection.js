@@ -49,8 +49,19 @@ class VoiceConnection {
                             adapterCreator: channel.guild.voiceAdapterCreator
                         });
                         if(maxListeners) connection.setMaxListeners(maxListeners);
-                        connection.on("error", (err) => reject(err));
-                        connection.on(VoiceConnectionStatus.Ready, () => resolve());
+
+                        const onError = (err) => {
+                            connection.removeListener("error", onError);
+                            reject(err);
+                        };
+
+                        const onReady = () => {
+                            connection.removeListener(VoiceConnectionStatus.Ready, onReady);
+                            resolve();
+                        };
+
+                        connection.on("error", onError)
+                        connection.on(VoiceConnectionStatus.Ready, onReady);
                     } else {
                         reject(new VoiceConnectionError("MISSING_PERMISSIONS"));
                     };
@@ -65,7 +76,13 @@ class VoiceConnection {
         return new Promise((resolve, reject) => {
             const connection = getVoiceConnection(this.guildId);
             if(connection) {
-                connection.on(VoiceConnectionStatus.Destroyed, () => resolve());
+                const onDestroyed = () => {
+                    connection.removeListener(VoiceConnectionStatus.Destroyed, onDestroyed);
+                    resolve();
+                };
+
+                connection.on(VoiceConnectionStatus.Destroyed, onDestroyed);
+
                 connection.destroy();
             } else {
                 reject(new VoiceConnectionError("NO_CONNECTION"));
@@ -83,9 +100,25 @@ class VoiceConnection {
                     this._player = createAudioPlayer();
 
                     const emitter = new EventEmitter();
-                    this._player.on(AudioPlayerStatus.Playing, () => emitter.emit("playing"));
-                    this._player.on(AudioPlayerStatus.Idle, () => emitter.emit("idle"));
-                    this._player.on("error", (err) => emitter.emit("error", err));
+
+                    const onPlaying = () => {
+                        this._player.removeListener(AudioPlayerStatus.Playing, onPlaying);
+                        emitter.emit("playing");
+                    };
+
+                    const onIdle = () => {
+                        this._player.removeListener(AudioPlayerStatus.Idle, onIdle);
+                        emitter.emit("idle");
+                    };
+
+                    const onError = (err) => {
+                        this._player.removeListener("error", onError);
+                        emitter.emit("error", err);
+                    };
+
+                    this._player.on(AudioPlayerStatus.Playing, onPlaying);
+                    this._player.on(AudioPlayerStatus.Idle, onIdle);
+                    this._player.on("error", onError);
                     resolve(emitter);
 
                     this._player.play(this._resource);
@@ -111,7 +144,13 @@ class VoiceConnection {
                             resolve();
                         };
                     } else {
-                        this._player.on(AudioPlayerStatus.Paused, () => resolve());
+                        const onPaused = () => {
+                            this._player.removeListener(AudioPlayerStatus.Paused, onPaused);
+                            resolve();
+                        };
+
+                        this._player.on(AudioPlayerStatus.Paused, onPaused);
+
                         this._player.pause();
                     };
                 } else {
@@ -129,7 +168,13 @@ class VoiceConnection {
             if(connection) {
                 if(connection.state.status === VoiceConnectionStatus.Ready) {
                     if(this._player.state.status === AudioPlayerStatus.Paused) {
-                        this._player.on(AudioPlayerStatus.Playing, () => resolve());
+                        const onPlaying = () => {
+                            this._player.removeListener(AudioPlayerStatus.Playing, onPlaying);
+                            resolve();
+                        };
+
+                        this._player.on(AudioPlayerStatus.Playing, onPlaying);
+
                         this._player.unpause();
                     } else {
                         if(rejectIfNotPaused) {
