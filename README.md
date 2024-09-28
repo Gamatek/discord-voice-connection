@@ -1,49 +1,82 @@
-# 🔊 Discord VoiceConnection
+# 🔊 Discord Voice Connection Wrapper
 
-## Exemple
+This project provides a wrapper class for managing voice connections in Discord bots using the discord.js library and @discordjs/voice package.
 
-```js
-const { Client, Intents } = require("discord.js");
-const VoiceConnection = require("./VoiceConnection");
-const ytdl = require("ytdl-core");
-const config = require("./config.json");
+## Features
 
-const client = new Client({
-    intents: [
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_VOICE_STATES
-    ]
-});
+- Join and leave voice channels
+- Play audio streams
+- Pause and unpause playback
+- Control audio volume
+- Error handling with custom error class
 
-client.on("ready", () => {
-    console.log(`Logged in as ${client.user.tag}`);
+## Installation
 
-    const conn = new VoiceConnection(client, "CHANNEL_ID");
-    conn.join().then(() => {
-        console.log("joined");
-        conn.play(
-            ytdl("VIDEO_URL", {
-                filter: "audioonly",
-                highWaterMark: 1 << 62,
-                liveBuffer: 1 << 62,
-                dlChunkSize: 0
-            })
-        ).then((emitter) => {
-            emitter.on("playing", () => console.log("playing..."));
-            emitter.on("idle", () => console.log("idle (ended)"));
-        });
-    });
-});
+To use this wrapper, make sure you have the following dependencies installed:
 
-client.on("voiceStateUpdate", async (oldState, newState) => {
-    if(
-        newState.channelId
-        && newState.channel.type === "GUILD_STAGE_VOICE"
-        && newState.guild.members.me.voice.suppress
-    ) {
-        await newState.guild.members.me.voice.setSuppressed(false).catch(() => {});
-    };
-});
-
-client.login("TOKEN");
+```bash
+npm install discord.js @discordjs/voice
 ```
+
+## Usage
+
+First, import the `VoiceConnection` class:
+
+```javascript
+const VoiceConnection = require('./VoiceConnection');
+```
+
+Then, you can use it in your Discord bot as follows:
+
+```javascript
+const { Client, Intents } = require('discord.js');
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES] });
+
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+});
+
+client.on('messageCreate', async (message) => {
+  if (message.content === '!join') {
+    const voiceConnection = new VoiceConnection(client, message.member.voice.channel.id);
+    try {
+      await voiceConnection.join();
+      message.reply('Joined the voice channel!');
+    } catch (error) {
+      message.reply(`Failed to join: ${error.message}`);
+    }
+  }
+});
+
+client.login('YOUR_BOT_TOKEN');
+```
+
+## API
+
+### `VoiceConnection`
+
+#### Constructor
+
+- `constructor(client, channelId)`: Creates a new VoiceConnection instance.
+
+#### Methods
+
+- `join(maxListeners)`: Joins a voice channel.
+- `destroy()`: Leaves the voice channel.
+- `play(stream, volume)`: Plays an audio stream.
+- `pause(rejectIfAlreadyPaused)`: Pauses the current playback.
+- `unpause(rejectIfNotPaused)`: Unpauses the current playback.
+- `isPaused()`: Checks if the playback is paused.
+- `getVolume()`: Gets the current volume.
+- `setVolume(volume)`: Sets the playback volume.
+
+## Error Handling
+
+The wrapper uses a custom `VoiceConnectionError` class to handle various error scenarios. Error codes include:
+
+- `NO_CONNECTION`
+- `MISSING_PERMISSIONS`
+- `CONNECTION_NOT_READY`
+- `NO_RESOURCE`
+- `PLAYER_ALREADY_PAUSED`
+- `PLAYER_NOT_PAUSED`
