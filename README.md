@@ -58,6 +58,8 @@ client.login('YOUR_BOT_TOKEN');
 #### Constructor
 
 - `constructor(client, channelId)`: Creates a new VoiceConnection instance.
+- `client`: Discord.js Client instance.
+- `channelId`: 
 
 #### Methods
 
