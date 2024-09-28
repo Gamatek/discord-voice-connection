@@ -23,32 +23,32 @@ npm install discord.js @discordjs/voice
 First, import the `VoiceConnection` class:
 
 ```javascript
-const VoiceConnection = require('./VoiceConnection');
+const VoiceConnection = require("./VoiceConnection");
 ```
 
 Then, you can use it in your Discord bot as follows:
 
 ```javascript
-const { Client, Intents } = require('discord.js');
+const { Client, Intents } = require("discord.js");
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES] });
 
-client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+client.on("ready", () => {
+    console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.on('messageCreate', async (message) => {
-  if (message.content === '!join') {
-    const voiceConnection = new VoiceConnection(client, message.member.voice.channel.id);
-    try {
-      await voiceConnection.join();
-      message.reply('Joined the voice channel!');
-    } catch (error) {
-      message.reply(`Failed to join: ${error.message}`);
-    }
-  }
+client.on("messageCreate", async (message) => {
+    if (message.content === "!join") {
+        const voiceConnection = new VoiceConnection(client, message.member.voice.channel.id);
+        try {
+            await voiceConnection.join();
+            message.reply("Joined the voice channel!");
+        } catch (error) {
+            message.reply(`Failed to join: ${error.message}`);
+        };
+    };
 });
 
-client.login('YOUR_BOT_TOKEN');
+client.login("YOUR_BOT_TOKEN");
 ```
 
 ## API
